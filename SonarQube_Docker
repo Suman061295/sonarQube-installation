@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# --- Docker Installation Check ---
+if docker --version &> /dev/null; then
+    echo "Docker is already installed. Continuing with script..."
+else
+    echo "Error: Docker is not installed. Please install Docker to proceed."
+    echo "You can find installation instructions at https://docs.docker.com/get-docker/"
+    exit 1
+fi
+
+# --- Create Volumes for Persistent Data ---
+echo "Create volumes for sonarqube to presist data"
+docker volume create --name sonarqube_data
+docker volume create --name sonarqube_logs
+docker volume create --name sonarqube_extensions
+
+# --- Launch the SonarQube Container ---
+echo "Launching SonarQube container..."
+docker run -d --name sonarqube \
+    -p 9000:9000 \
+    -e SONAR_JDBC_USERNAME=admin \
+    -e SONAR_JDBC_PASSWORD=admin \
+    -v sonarqube_data:/opt/sonarqube/data \
+    -v sonarqube_extensions:/opt/sonarqube/extensions \
+    -v sonarqube_logs:/opt/sonarqube/logs \
+    sonarqube
+
+# --- Display Login Credentials ---
+echo "SonarQube, a default user with Admisistrator System Permission is created automatically: "
+echo "Login: admin"
+echo "Password: admin"
